@@ -1,6 +1,6 @@
 """
 Liquidity Sniper - Corporate Cyberpunk Trading Dashboard.
-Real-time anomaly detection + Order Book analysis + Paper Trading.
+Bilingual (English/Spanish) + Real-time Anomalies + Paper Trading.
 """
 
 import streamlit as st
@@ -11,95 +11,113 @@ import time
 st.set_page_config(page_title="Liquidity Sniper", page_icon="🎯", layout="wide")
 
 # ==========================================
+# 🌐 TRANSLATIONS DICTIONARY
+# ==========================================
+TRANSLATIONS = {
+    "en": {
+        "title": "🎯 LIQUIDITY SNIPER // OPS TERMINAL",
+        "subtitle": "Real-Time Market Anomaly Detection & Order Book Analysis",
+        "strategy_params": "⚙️ STRATEGY PARAMETERS",
+        "select_asset": "Select Asset",
+        "timeframe": "Timeframe",
+        "vol_mult": "Volume Multiplier (Threshold)",
+        "price_thresh": "Price Change Threshold (%)",
+        "paper_wallet": "💼 PAPER WALLET",
+        "usdt_bal": "USDT Balance",
+        "coin_bal": "{symbol} Balance",
+        "reset_wallet": "🔄 Reset Wallet",
+        "scan_btn": "🚀 SCAN MARKET NOW",
+        "telemetry": "📊 BATTLEFIELD TELEMETRY",
+        "current_price": "Current Price",
+        "imbalance": "Order Book Imbalance",
+        "anomalies": "Anomalies Detected",
+        "buy_press": "Buy Pressure",
+        "sell_press": "Sell Pressure",
+        "neutral": "Neutral",
+        "execution": "🤖 ALGORITHMIC EXECUTION",
+        "anomaly_detected": "🚨 ANOMALY DETECTED! Order Book Imbalance: {imb}",
+        "bullish_buy": "📈 Bullish Imbalance detected. Executing PAPER BUY order for $1,000...",
+        "bought": "Bought {coins:.4f} {symbol} at ${price:,.4f}. Fee paid: ${fee:.2f}",
+        "bearish_sell": "📉 Bearish Imbalance detected. Executing PAPER SELL order...",
+        "sold": "Sold all {symbol} at ${price:,.4f}. Fee paid: ${fee:.2f}",
+        "no_trade": "Anomaly detected, but Order Book Imbalance does not meet trade criteria.",
+        "stable": "✅ Market looks stable. No anomalies detected.",
+        "error_fetch": "Failed to fetch data from Binance.",
+        "standby": "💡 **STANDBY MODE:** Adjust parameters on the left and press 'SCAN MARKET NOW' to begin tactical analysis."
+    },
+    "es": {
+        "title": "🎯 LIQUIDITY SNIPER // TERMINAL DE OPS",
+        "subtitle": "Detección de Anomalías de Mercado en Tiempo Real y Análisis de Libro de Órdenes",
+        "strategy_params": "⚙️ PARÁMETROS DE ESTRATEGIA",
+        "select_asset": "Seleccionar Activo",
+        "timeframe": "Marco Temporal",
+        "vol_mult": "Multiplicador de Volumen (Umbral)",
+        "price_thresh": "Umbral de Cambio de Precio (%)",
+        "paper_wallet": "💼 BILLETERA FICTICIA",
+        "usdt_bal": "Balance USDT",
+        "coin_bal": "Balance {symbol}",
+        "reset_wallet": "🔄 Reiniciar Billetera",
+        "scan_btn": "🚀 ESCANEAR MERCADO AHORA",
+        "telemetry": "📊 TELEMETRÍA DEL CAMPO DE BATALLA",
+        "current_price": "Precio Actual",
+        "imbalance": "Desequilibrio Libro de Órdenes",
+        "anomalies": "Anomalías Detectadas",
+        "buy_press": "Presión de Compra",
+        "sell_press": "Presión de Venta",
+        "neutral": "Neutral",
+        "execution": "🤖 EJECUCIÓN ALGORÍTMICA",
+        "anomaly_detected": "🚨 ¡ANOMALÍA DETECTADA! Desequilibrio: {imb}",
+        "bullish_buy": "📈 Presión compradora detectada. Ejecutando orden de COMPRA FICTICIA por $1,000...",
+        "bought": "Comprado {coins:.4f} {symbol} a ${price:,.4f}. Comisión pagada: ${fee:.2f}",
+        "bearish_sell": "📉 Presión vendedora detectada. Ejecutando orden de VENTA FICTICIA...",
+        "sold": "Vendido todo {symbol} a ${price:,.4f}. Comisión pagada: ${fee:.2f}",
+        "no_trade": "Anomalía detectada, pero el Desequilibrio del Libro no cumple los criterios.",
+        "stable": "✅ El mercado parece estable. Sin anomalías detectadas.",
+        "error_fetch": "Fallo al obtener datos de Binance.",
+        "standby": "💡 **MODO ESPERA:** Ajusta los parámetros a la izquierda y presiona 'ESCANEAR MERCADO AHORA' para comenzar."
+    }
+}
+
+# ==========================================
 # 🎨 CORPORATE CYBERPUNK THEME (CSS)
 # ==========================================
 corporate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-/* Fondo general */
-.stApp {
-    background-color: #0b0c10;
-    color: #c5c6c7;
-    font-family: 'Share Tech Mono', monospace;
-}
-
-/* Título Principal (Verde Militar) */
-h1 {
-    color: #66fcf1 !important;
-    text-shadow: 0 0 10px #45a29e;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    border-bottom: 2px solid #ff4c00;
-    padding-bottom: 10px;
-}
-
-h2, h3 {
-    color: #45a29e !important;
-    text-transform: uppercase;
-}
-
-/* Controles de la barra lateral */
-.stSelectbox, .stSlider {
-    background-color: #1f2833 !important;
-    color: #66fcf1 !important;
-}
-
-/* Botones (Estilo táctico) */
-.stButton > button {
-    background-color: #1f2833 !important;
-    color: #ff4c00 !important;
-    border: 2px solid #ff4c00 !important;
-    border-radius: 0px !important;
-    text-transform: uppercase;
-    transition: all 0.2s ease !important;
-    width: 100%;
-    box-shadow: 0 0 10px rgba(255, 76, 0, 0.2);
-}
-
-.stButton > button:hover {
-    background-color: #ff4c00 !important;
-    color: #000000 !important;
-    box-shadow: 0 0 20px rgba(255, 76, 0, 0.8) !important;
-}
-
-/* Tarjetas de métricas */
-div[data-testid="stMetric"] {
-    background-color: #1f2833;
-    border: 1px solid #45a29e;
-    border-top: 3px solid #66fcf1;
-    border-radius: 0px;
-    padding: 15px;
-    box-shadow: 0 0 10px rgba(102, 252, 241, 0.1);
-}
-
-div[data-testid="stMetricValue"] {
-    color: #66fcf1 !important;
-    font-family: 'Share Tech Mono', monospace;
-}
-
-/* Cajas de alertas */
-.stAlert {
-    background-color: #1f2833;
-    border: 1px solid #ff4c00;
-    color: #ff4c00;
-    border-radius: 0px;
-}
+.stApp { background-color: #0b0c10; color: #c5c6c7; font-family: 'Share Tech Mono', monospace; }
+h1 { color: #66fcf1 !important; text-shadow: 0 0 10px #45a29e; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid #ff4c00; padding-bottom: 10px; }
+h2, h3 { color: #45a29e !important; text-transform: uppercase; }
+.stSelectbox, .stSlider { background-color: #1f2833 !important; color: #66fcf1 !important; }
+.stButton > button { background-color: #1f2833 !important; color: #ff4c00 !important; border: 2px solid #ff4c00 !important; border-radius: 0px !important; text-transform: uppercase; transition: all 0.2s ease !important; width: 100%; box-shadow: 0 0 10px rgba(255, 76, 0, 0.2); }
+.stButton > button:hover { background-color: #ff4c00 !important; color: #000000 !important; box-shadow: 0 0 20px rgba(255, 76, 0, 0.8) !important; }
+div[data-testid="stMetric"] { background-color: #1f2833; border: 1px solid #45a29e; border-top: 3px solid #66fcf1; border-radius: 0px; padding: 15px; box-shadow: 0 0 10px rgba(102, 252, 241, 0.1); }
+div[data-testid="stMetricValue"] { color: #66fcf1 !important; font-family: 'Share Tech Mono', monospace; }
+.stAlert { background-color: #1f2833; border: 1px solid #ff4c00; color: #ff4c00; border-radius: 0px; }
 </style>
 """
 st.markdown(corporate_css, unsafe_allow_html=True)
 
-st.title("🎯 LIQUIDITY SNIPER // OPS TERMINAL")
-st.markdown("**Real-Time Market Anomaly Detection & Order Book Analysis**")
-st.divider()
-
 # ==========================================
-# WALLET STATE
+# WALLET STATE (Persistent across language changes)
 # ==========================================
 if "usdt_balance" not in st.session_state:
     st.session_state.usdt_balance = 10000.0
 if "coin_balance" not in st.session_state:
     st.session_state.coin_balance = 0.0
+
+# ==========================================
+# LANGUAGE SELECTOR (Sidebar Top)
+# ==========================================
+lang_options = {"en": "🇺🇸 English", "es": "🇪🇸 Español"}
+selected_lang = st.sidebar.selectbox("Language / Idioma", options=list(lang_options.keys()), format_func=lambda x: lang_options[x])
+t = TRANSLATIONS[selected_lang]
+
+# ==========================================
+# HEADER
+# ==========================================
+st.title(t["title"])
+st.markdown(f"**{t['subtitle']}**")
+st.divider()
 
 # ==========================================
 # LAYOUT: CONTROLS (LEFT) & TELEMETRY (RIGHT)
@@ -110,37 +128,37 @@ col_controls, col_telemetry = st.columns([1, 2], gap="large")
 # COLUMNA IZQUIERDA: PARÁMETROS Y WALLET
 # ------------------------------------------
 with col_controls:
-    st.markdown("### ⚙️ STRATEGY PARAMETERS")
+    st.markdown(f"### {t['strategy_params']}")
     
-    symbol = st.selectbox("Select Asset", ["BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "PEPEUSDT"])
-    interval = st.selectbox("Timeframe", ["1m", "5m", "15m"])
-    vol_mult = st.slider("Volume Multiplier (Threshold)", 2.0, 10.0, 4.0)
-    price_thresh = st.slider("Price Change Threshold (%)", 0.5, 5.0, 1.5)
+    symbol = st.selectbox(t["select_asset"], ["BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "PEPEUSDT"])
+    interval = st.selectbox(t["timeframe"], ["1m", "5m", "15m"])
+    vol_mult = st.slider(t["vol_mult"], 2.0, 10.0, 4.0)
+    price_thresh = st.slider(t["price_thresh"], 0.5, 5.0, 1.5)
     
     st.divider()
     
-    st.markdown("### 💼 PAPER WALLET")
-    st.metric("USDT Balance", f"${st.session_state.usdt_balance:,.2f}")
-    st.metric(f"{symbol[:-4]} Balance", f"{st.session_state.coin_balance:.4f}")
+    st.markdown(f"### {t['paper_wallet']}")
+    st.metric(t["usdt_bal"], f"${st.session_state.usdt_balance:,.2f}")
+    st.metric(t["coin_bal"].format(symbol=symbol[:-4]), f"{st.session_state.coin_balance:.4f}")
     
-    if st.button("🔄 Reset Wallet"):
+    if st.button(t["reset_wallet"]):
         st.session_state.usdt_balance = 10000.0
         st.session_state.coin_balance = 0.0
         st.rerun()
         
     st.divider()
-    scan_btn = st.button("🚀 SCAN MARKET NOW", type="primary")
+    scan_btn = st.button(t["scan_btn"], type="primary")
 
 # ------------------------------------------
 # COLUMNA DERECHA: RESULTADOS Y GRÁFICA
 # ------------------------------------------
 with col_telemetry:
-    st.markdown("### 📊 BATTLEFIELD TELEMETRY")
+    st.markdown(f"### {t['telemetry']}")
     
     if scan_btn:
         analyzer = MarketAnalyzer()
         
-        with st.spinner(f"Scanning {symbol} and analyzing Order Book..."):
+        with st.spinner("Scanning / Escaneando..."):
             df = analyzer.get_klines(symbol=symbol, interval=interval, limit=100)
             imbalance = analyzer.get_order_book_imbalance(symbol)
             
@@ -150,14 +168,21 @@ with col_telemetry:
                 
                 # --- METRICS ---
                 c1, c2, c3 = st.columns(3)
-                c1.metric("Current Price", f"${current_price:,.4f}")
+                c1.metric(t["current_price"], f"${current_price:,.4f}")
                 
                 # Delta color logic
-                delta_label = "Buy Pressure" if imbalance > 1.2 else ("Sell Pressure" if imbalance < 0.8 else "Neutral")
-                delta_color = "normal" if imbalance > 1.2 else ("inverse" if imbalance < 0.8 else "off")
+                if imbalance > 1.2:
+                    delta_label = t["buy_press"]
+                    delta_color = "normal"
+                elif imbalance < 0.8:
+                    delta_label = t["sell_press"]
+                    delta_color = "inverse"
+                else:
+                    delta_label = t["neutral"]
+                    delta_color = "off"
                 
-                c2.metric("Order Book Imbalance", f"{imbalance} x", delta=delta_label, delta_color=delta_color)
-                c3.metric("Anomalies Detected", len(anomalies))
+                c2.metric(t["imbalance"], f"{imbalance} x", delta=delta_label, delta_color=delta_color)
+                c3.metric(t["anomalies"], len(anomalies))
                 
                 # --- CHART ---
                 fig = go.Figure(data=[go.Candlestick(
@@ -173,52 +198,49 @@ with col_telemetry:
                     ))
                     
                 fig.update_layout(
-                    template="plotly_dark", 
-                    height=450, 
-                    margin=dict(l=0, r=0, t=10, b=0),
-                    paper_bgcolor="#0b0c10",
-                    plot_bgcolor="#1f2833",
+                    template="plotly_dark", height=450, margin=dict(l=0, r=0, t=10, b=0),
+                    paper_bgcolor="#0b0c10", plot_bgcolor="#1f2833",
                     font=dict(family="Share Tech Mono", color="#66fcf1")
                 )
                 st.plotly_chart(fig, use_container_width=True)
                 
                 # --- TRADING LOGIC ---
                 st.divider()
-                st.markdown("### 🤖 ALGORITHMIC EXECUTION")
+                st.markdown(f"### {t['execution']}")
                 
                 if not anomalies.empty:
-                    st.warning(f"🚨 ANOMALY DETECTED! Order Book Imbalance: {imbalance}")
+                    st.warning(t["anomaly_detected"].format(imb=imbalance))
                     
                     # BUY LOGIC
                     if imbalance > 1.2 and st.session_state.usdt_balance >= 1000:
-                        st.info("📈 Bullish Imbalance detected. Executing PAPER BUY order for $1,000...")
+                        st.info(t["bullish_buy"])
                         trade_amount = 1000.0
                         coins, fee = analyzer.simulate_trade(trade_amount, current_price, "BUY")
                         
                         st.session_state.usdt_balance -= trade_amount
                         st.session_state.coin_balance += coins
                         
-                        st.success(f"Bought {coins:.4f} {symbol[:-4]} at ${current_price:,.4f}. Fee paid: ${fee:.2f}")
+                        st.success(t["bought"].format(coins=coins, symbol=symbol[:-4], price=current_price, fee=fee))
                         time.sleep(1.5)
                         st.rerun()
                         
                     # SELL LOGIC
                     elif imbalance < 0.8 and st.session_state.coin_balance > 0:
-                        st.info("📉 Bearish Imbalance detected. Executing PAPER SELL order...")
+                        st.info(t["bearish_sell"])
                         trade_value = st.session_state.coin_balance * current_price
                         cash_earned, fee = analyzer.simulate_trade(trade_value, current_price, "SELL")
                         
                         st.session_state.coin_balance = 0.0
                         st.session_state.usdt_balance += cash_earned
                         
-                        st.success(f"Sold all {symbol[:-4]} at ${current_price:,.4f}. Fee paid: ${fee:.2f}")
+                        st.success(t["sold"].format(symbol=symbol[:-4], price=current_price, fee=fee))
                         time.sleep(1.5)
                         st.rerun()
                     else:
-                        st.info("Anomaly detected, but Order Book Imbalance does not meet trade criteria.")
+                        st.info(t["no_trade"])
                 else:
-                    st.success("✅ Market looks stable. No anomalies detected.")
+                    st.success(t["stable"])
             else:
-                st.error("Failed to fetch data from Binance.")
+                st.error(t["error_fetch"])
     else:
-        st.info("💡 **STANDBY MODE:** Adjust parameters on the left and press 'SCAN MARKET NOW' to begin tactical analysis.")
+        st.info(t["standby"])
