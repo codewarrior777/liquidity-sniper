@@ -1,7 +1,7 @@
 # 🎯 Liquidity Sniper: Algorithmic Market Anomaly Detector
 
-[![Live Demo](https://img.shields.io/badge/demo-LIVE-brightgreen?style=for-the-badge&logo=streamlit)](TU_URL_DE_STREAMLIT)
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](TU_URL_DE_STREAMLIT)
+[![Live Demo](https://img.shields.io/badge/demo-LIVE-brightgreen?style=for-the-badge&logo=streamlit)](https://liquidity-sniper-7pbplvdjl8edrykrvtsxy.streamlit.app)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://liquidity-sniper-7pbplvdjl8edrykrvtsxy.streamlit.app)
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
 [![Data Science](https://img.shields.io/badge/Domain-Data%20Science%20%7C%20Fintech-green.svg)]()
 [![Binance API](https://img.shields.io/badge/API-Binance%20Public-yellow.svg)]()
@@ -13,7 +13,7 @@ This tool bridges the gap between Data Science and Financial Market Microstructu
 
 ## 🌐 Try It Live
 
-🔴 **[Open the Interactive Dashboard Here](TU_URL_DE_STREAMLIT)**
+🔴 **[Open the Interactive Dashboard Here](https://liquidity-sniper-7pbplvdjl8edrykrvtsxy.streamlit.app)**
 
 No installation needed — just click and explore the tactical trading terminal in your browser. Available in English and Spanish.
 
