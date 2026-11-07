@@ -1,6 +1,7 @@
 """
 Liquidity Sniper - Advanced Market Analyzer.
 Analyzes Order Book imbalance, detects anomalies, and simulates trading with fees.
+Fixed: Using tld='us' to resolve DNS issues for US-based connections.
 """
 
 import pandas as pd
@@ -8,8 +9,8 @@ from binance.client import Client
 
 class MarketAnalyzer:
     def __init__(self):
-        # Usamos la API pública (no requiere keys para leer datos)
-        self.client = Client()
+        # Forzamos el uso del endpoint de EE. UU. para evitar problemas de DNS
+        self.client = Client(tld='us')
         self.taker_fee = 0.001 # 0.1% de comisión típica en Binance
 
     def get_klines(self, symbol="BTCUSDT", interval="1m", limit=100):
@@ -29,19 +30,13 @@ class MarketAnalyzer:
             return None
 
     def get_order_book_imbalance(self, symbol="BTCUSDT", limit=50):
-        """
-        Lee el Libro de Órdenes y calcula el ratio de compra/venta.
-        Un ratio > 1 significa más presión compradora (Bullish).
-        """
         try:
             depth = self.client.get_order_book(symbol=symbol, limit=limit)
             
-            # Sumamos el volumen total de las ofertas (bids) y demandas (asks)
             bid_volume = sum(float(bid[1]) for bid in depth['bids'])
             ask_volume = sum(float(ask[1]) for ask in depth['asks'])
             
             if ask_volume == 0: return 1.0
-            
             imbalance = bid_volume / ask_volume
             return round(imbalance, 2)
         except Exception as e:
@@ -51,19 +46,14 @@ class MarketAnalyzer:
     def detect_anomalies(self, df, volume_multiplier=5.0, price_change_threshold=2.0):
         if df is None or df.empty: return None
         
-        # Calculamos el volumen promedio de las últimas 20 velas
         df["avg_volume"] = df["volume"].rolling(window=20).mean()
-        
-        # Una anomalía ocurre si el volumen es X veces mayor al promedio Y el precio se movió bruscamente
         df["is_anomaly"] = (
             (df["volume"] > df["avg_volume"] * volume_multiplier) & 
             (df["price_change_pct"].abs() > price_change_threshold)
         )
-        
         return df[df["is_anomaly"] == True].copy()
 
     def simulate_trade(self, capital: float, price: float, action: str):
-        """Simula una orden a mercado y calcula la comisión de Binance."""
         fee_amount = capital * self.taker_fee
         net_capital = capital - fee_amount
         
