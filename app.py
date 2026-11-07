@@ -46,7 +46,7 @@ TRANSLATIONS = {
         "standby": "💡 **STANDBY MODE:** Adjust parameters on the left and press 'SCAN MARKET NOW' to begin tactical analysis."
     },
     "es": {
-        "title": "🎯 LIQUIDITY SNIPER // TERMINAL DE OPS",
+        "title": "🎯 FRANCO TIRADOR DE LIQUIDEZ // TERMINAL DE OPS", # <-- TÍTULO CORREGIDO
         "subtitle": "Detección de Anomalías de Mercado en Tiempo Real y Análisis de Libro de Órdenes",
         "strategy_params": "⚙️ PARÁMETROS DE ESTRATEGIA",
         "select_asset": "Seleccionar Activo",
