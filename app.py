@@ -1,6 +1,6 @@
 """
 Liquidity Sniper - Corporate Cyberpunk Trading Dashboard.
-Bilingual (English/Spanish) + Real-time Anomalies + Paper Trading.
+Bilingual (EN/ES) + Strong Legal Disclaimer + Real-time Anomalies.
 """
 
 import streamlit as st
@@ -17,6 +17,16 @@ TRANSLATIONS = {
     "en": {
         "title": "🎯 LIQUIDITY SNIPER // OPS TERMINAL",
         "subtitle": "Real-Time Market Anomaly Detection & Order Book Analysis",
+        "sidebar_disclaimer": "⚠️ **Risk Warning:** This is a Paper Trading simulation for educational purposes only. Not financial advice.",
+        "strong_disclaimer": """
+        **🚨 STRICT RISK WARNING & DISCLAIMER**
+        
+        1. **NOT FINANCIAL ADVICE:** This software is for educational, research, and defensive (compliance) purposes only. Nothing in this application constitutes financial, investment, or trading advice.
+        2. **SIMULATION ONLY:** This app uses "Paper Trading". It does not execute real trades, nor is it connected to any live exchange account.
+        3. **HIGH RISK:** Cryptocurrency markets are highly volatile. Algorithmic trading involves a substantial risk of loss. Past performance or backtesting does not guarantee future results.
+        4. **NO LIABILITY:** The developer (Gustavo Ramos) is not responsible or liable for any financial losses incurred if you modify this code for real-world trading.
+        5. **COMPLIANCE:** This tool is intended to *detect* market manipulation, not to participate in it. Market manipulation is illegal.
+        """,
         "strategy_params": "⚙️ STRATEGY PARAMETERS",
         "select_asset": "Select Asset",
         "timeframe": "Timeframe",
@@ -46,8 +56,18 @@ TRANSLATIONS = {
         "standby": "💡 **STANDBY MODE:** Adjust parameters on the left and press 'SCAN MARKET NOW' to begin tactical analysis."
     },
     "es": {
-        "title": "🎯 FRANCO TIRADOR DE LIQUIDEZ // TERMINAL DE OPS", # <-- TÍTULO CORREGIDO
+        "title": "🎯 FRANCO TIRADOR DE LIQUIDEZ // TERMINAL DE OPS",
         "subtitle": "Detección de Anomalías de Mercado en Tiempo Real y Análisis de Libro de Órdenes",
+        "sidebar_disclaimer": "⚠️ **Advertencia de Riesgo:** Esta es una simulación de Paper Trading solo con fines educativos. No es asesoramiento financiero.",
+        "strong_disclaimer": """
+        **🚨 ADVERTENCIA DE RIESGO ESTRICTA Y AVISO LEGAL**
+        
+        1. **NO ES ASESORAMIENTO FINANCIERO:** Este software es solo para fines educativos, de investigación y defensivos (cumplimiento). Nada en esta aplicación constituye asesoramiento financiero, de inversión o de trading.
+        2. **SOLO SIMULACIÓN:** Esta app usa "Paper Trading". No ejecuta operaciones reales ni está conectada a ninguna cuenta de exchange real.
+        3. **ALTO RIESGO:** Los mercados de criptomonedas son altamente volátiles. El trading algorítmico implica un riesgo sustancial de pérdida. El rendimiento pasado no garantiza resultados futuros.
+        4. **SIN RESPONSABILIDAD:** El desarrollador (Gustavo Ramos) no se hace responsable de las pérdidas financieras incurridas si modificas este código para trading real.
+        5. **CUMPLIMIENTO:** Esta herramienta está destinada a *detectar* manipulación de mercado, no a participar en ella. La manipulación de mercado es ilegal.
+        """,
         "strategy_params": "⚙️ PARÁMETROS DE ESTRATEGIA",
         "select_asset": "Seleccionar Activo",
         "timeframe": "Marco Temporal",
@@ -98,7 +118,7 @@ div[data-testid="stMetricValue"] { color: #66fcf1 !important; font-family: 'Shar
 st.markdown(corporate_css, unsafe_allow_html=True)
 
 # ==========================================
-# WALLET STATE (Persistent across language changes)
+# WALLET STATE
 # ==========================================
 if "usdt_balance" not in st.session_state:
     st.session_state.usdt_balance = 10000.0
@@ -106,11 +126,14 @@ if "coin_balance" not in st.session_state:
     st.session_state.coin_balance = 0.0
 
 # ==========================================
-# LANGUAGE SELECTOR (Sidebar Top)
+# LANGUAGE SELECTOR & SIDEBAR
 # ==========================================
 lang_options = {"en": "🇺🇸 English", "es": "🇪🇸 Español"}
 selected_lang = st.sidebar.selectbox("Language / Idioma", options=list(lang_options.keys()), format_func=lambda x: lang_options[x])
 t = TRANSLATIONS[selected_lang]
+
+# Disclaimer corto en la barra lateral
+st.sidebar.warning(t["sidebar_disclaimer"])
 
 # ==========================================
 # HEADER
@@ -120,13 +143,10 @@ st.markdown(f"**{t['subtitle']}**")
 st.divider()
 
 # ==========================================
-# LAYOUT: CONTROLS (LEFT) & TELEMETRY (RIGHT)
+# LAYOUT
 # ==========================================
 col_controls, col_telemetry = st.columns([1, 2], gap="large")
 
-# ------------------------------------------
-# COLUMNA IZQUIERDA: PARÁMETROS Y WALLET
-# ------------------------------------------
 with col_controls:
     st.markdown(f"### {t['strategy_params']}")
     
@@ -149,9 +169,6 @@ with col_controls:
     st.divider()
     scan_btn = st.button(t["scan_btn"], type="primary")
 
-# ------------------------------------------
-# COLUMNA DERECHA: RESULTADOS Y GRÁFICA
-# ------------------------------------------
 with col_telemetry:
     st.markdown(f"### {t['telemetry']}")
     
@@ -166,11 +183,9 @@ with col_telemetry:
                 anomalies = analyzer.detect_anomalies(df, vol_mult, price_thresh)
                 current_price = df["close"].iloc[-1]
                 
-                # --- METRICS ---
                 c1, c2, c3 = st.columns(3)
                 c1.metric(t["current_price"], f"${current_price:,.4f}")
                 
-                # Delta color logic
                 if imbalance > 1.2:
                     delta_label = t["buy_press"]
                     delta_color = "normal"
@@ -184,7 +199,6 @@ with col_telemetry:
                 c2.metric(t["imbalance"], f"{imbalance} x", delta=delta_label, delta_color=delta_color)
                 c3.metric(t["anomalies"], len(anomalies))
                 
-                # --- CHART ---
                 fig = go.Figure(data=[go.Candlestick(
                     x=df["open_time"], open=df["open"], high=df["high"],
                     low=df["low"], close=df["close"], name="Price"
@@ -204,14 +218,12 @@ with col_telemetry:
                 )
                 st.plotly_chart(fig, use_container_width=True)
                 
-                # --- TRADING LOGIC ---
                 st.divider()
                 st.markdown(f"### {t['execution']}")
                 
                 if not anomalies.empty:
                     st.warning(t["anomaly_detected"].format(imb=imbalance))
                     
-                    # BUY LOGIC
                     if imbalance > 1.2 and st.session_state.usdt_balance >= 1000:
                         st.info(t["bullish_buy"])
                         trade_amount = 1000.0
@@ -224,7 +236,6 @@ with col_telemetry:
                         time.sleep(1.5)
                         st.rerun()
                         
-                    # SELL LOGIC
                     elif imbalance < 0.8 and st.session_state.coin_balance > 0:
                         st.info(t["bearish_sell"])
                         trade_value = st.session_state.coin_balance * current_price
@@ -244,3 +255,9 @@ with col_telemetry:
                 st.error(t["error_fetch"])
     else:
         st.info(t["standby"])
+
+# ==========================================
+# STRONG DISCLAIMER (Footer)
+# ==========================================
+st.divider()
+st.error(t["strong_disclaimer"])
