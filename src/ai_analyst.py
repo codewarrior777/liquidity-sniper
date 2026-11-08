@@ -14,7 +14,7 @@ client = OpenAI(
     api_key=os.getenv("GROQ_API_KEY", "dummy_key")
 )
 
-MODEL = "llama-3.1-70b-versatile"
+MODEL = "openai/gpt-oss-120b"
 
 def analyze_market_condition(symbol: str, price: float, imbalance: float, anomalies: int, lang: str = "en") -> str:
     """Genera un reporte de análisis de mercado usando IA."""
