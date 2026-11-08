@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
 [![Data Science](https://img.shields.io/badge/Domain-Data%20Science%20%7C%20Fintech-green.svg)]()
 [![Binance API](https://img.shields.io/badge/API-Binance%20Public-yellow.svg)]()
-[![Status](https://img.shields.io/badge/Repository-Private-red.svg)]()
+[![Status](https://img.shields.io/badge/Repository-Public-brightgreen.svg)]() <!-- Cambiado a Public -->
 
 An algorithmic trading dashboard designed to detect **Pump & Dump** patterns and market manipulation in real-time. 
 
@@ -74,7 +74,7 @@ graph TD
 - Python 3.10+
 
 ### Installation
-1. Clone the repository (Requires access granted by owner):
+1. Clone the repository:
    ```bash
    git clone https://github.com/codewarrior777/liquidity-sniper.git
    cd liquidity-sniper
