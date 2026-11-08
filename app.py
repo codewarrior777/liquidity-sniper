@@ -1,11 +1,12 @@
 """
 Liquidity Sniper - Corporate Cyberpunk Trading Dashboard.
-Bilingual (EN/ES) + Strong Legal Disclaimer + Real-time Anomalies.
+Bilingual (EN/ES) + AI Market Analyst + Strong Disclaimer + Real-time Anomalies.
 """
 
 import streamlit as st
 import plotly.graph_objects as go
 from src.market_analyzer import MarketAnalyzer
+from src.ai_analyst import analyze_market_condition # Importamos la IA
 import time
 
 st.set_page_config(page_title="Liquidity Sniper", page_icon="🎯", layout="wide")
@@ -53,7 +54,9 @@ TRANSLATIONS = {
         "no_trade": "Anomaly detected, but Order Book Imbalance does not meet trade criteria.",
         "stable": "✅ Market looks stable. No anomalies detected.",
         "error_fetch": "Failed to fetch data from Binance.",
-        "standby": "💡 **STANDBY MODE:** Adjust parameters on the left and press 'SCAN MARKET NOW' to begin tactical analysis."
+        "standby": "💡 **STANDBY MODE:** Adjust parameters on the left and press 'SCAN MARKET NOW' to begin tactical analysis.",
+        "ai_analyst_title": "🧠 AI Market Analyst Report",
+        "ai_analyst_loading": "AI Analyst is reading the Order Book..."
     },
     "es": {
         "title": "🎯 FRANCO TIRADOR DE LIQUIDEZ // TERMINAL DE OPS",
@@ -94,7 +97,9 @@ TRANSLATIONS = {
         "no_trade": "Anomalía detectada, pero el Desequilibrio del Libro no cumple los criterios.",
         "stable": "✅ El mercado parece estable. Sin anomalías detectadas.",
         "error_fetch": "Fallo al obtener datos de Binance.",
-        "standby": "💡 **MODO ESPERA:** Ajusta los parámetros a la izquierda y presiona 'ESCANEAR MERCADO AHORA' para comenzar."
+        "standby": "💡 **MODO ESPERA:** Ajusta los parámetros a la izquierda y presiona 'ESCANEAR MERCADO AHORA' para comenzar.",
+        "ai_analyst_title": "🧠 Reporte del Analista de Mercado IA",
+        "ai_analyst_loading": "El Analista IA está leyendo el Libro de Órdenes..."
     }
 }
 
@@ -183,6 +188,7 @@ with col_telemetry:
                 anomalies = analyzer.detect_anomalies(df, vol_mult, price_thresh)
                 current_price = df["close"].iloc[-1]
                 
+                # --- METRICS ---
                 c1, c2, c3 = st.columns(3)
                 c1.metric(t["current_price"], f"${current_price:,.4f}")
                 
@@ -199,6 +205,15 @@ with col_telemetry:
                 c2.metric(t["imbalance"], f"{imbalance} x", delta=delta_label, delta_color=delta_color)
                 c3.metric(t["anomalies"], len(anomalies))
                 
+                # --- AI MARKET ANALYST ---
+                st.markdown("---")
+                with st.expander(t["ai_analyst_title"], expanded=True):
+                    with st.spinner(t["ai_analyst_loading"]):
+                        ai_report = analyze_market_condition(symbol, current_price, imbalance, len(anomalies), selected_lang)
+                        st.info(ai_report)
+                st.markdown("---")
+                
+                # --- CHART ---
                 fig = go.Figure(data=[go.Candlestick(
                     x=df["open_time"], open=df["open"], high=df["high"],
                     low=df["low"], close=df["close"], name="Price"
@@ -218,6 +233,7 @@ with col_telemetry:
                 )
                 st.plotly_chart(fig, use_container_width=True)
                 
+                # --- TRADING LOGIC ---
                 st.divider()
                 st.markdown(f"### {t['execution']}")
                 
